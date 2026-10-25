@@ -7,7 +7,7 @@ A responsive browser-game prototype inspired by the wireframe and charity: water
 - The title screen shows the game name and a rotating planet. Play is its only interactive element.
 - Move Jerry, a friendly water jug, with the arrow keys or touch controls.
 - Collect clean blue drops to gain water charges.
-- Press and hold Space or Z to shoot water shots at muddy drops.
+- Press and hold Space or Z to shoot water shots at muddy drops arriving in readable waves. The pace rises gradually.
 - Cleanse 12 dirty drops to complete the mission and see the well-building celebration.
 - Muddy cloud obstacles can lower the score and consume a charge. Missed drops do not end the game.
 
