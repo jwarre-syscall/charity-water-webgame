@@ -305,10 +305,10 @@ main { width: 100%; margin: 0 auto; }
 .lane-ripple { position: absolute; z-index: -1; left: 10%; width: 80%; height: 18px; border-top: 2px solid rgba(255,247,225,.18); border-radius: 50%; }
 .ripple-one { top: 28%; }
 .ripple-two { top: 65%; left: 18%; width: 64%; opacity: .55; }
-.player-jug { position: absolute; z-index: 4; width: 86px; height: 96px; display: grid; place-items: center; transform: translate(-50%,-50%); filter: none; transition: left .06s linear,top .06s linear; }
+.player-jug { position: absolute; z-index: 4; width: 68px; height: 76px; display: grid; place-items: center; transform: translate(-50%,-50%); filter: none; transition: left .06s linear,top .06s linear; }
 .jug-glow { display: none; }
-.jug-badge { width: 76px; height: 86px; display: grid; place-items: center; overflow: hidden; border: 2px solid #003366; border-radius: 4px; background: #fff; box-shadow: 0 4px 12px rgba(26,26,26,.16); }
-.jug-badge img { display: block; width: 125%; height: 125%; max-width: none; object-fit: contain; }
+.jug-badge { width: 60px; height: 68px; display: grid; place-items: center; overflow: hidden; border: 2px solid #003366; border-radius: 4px; background: #fff; box-shadow: 0 4px 12px rgba(26,26,26,.16); }
+.jug-badge img { display: block; width: 115%; height: 115%; max-width: none; object-fit: contain; }
 .drop { width: 25px; height: 32px; filter: drop-shadow(0 2px 1px rgba(26,26,26,.16)); }
 .drop.dirty svg { fill: #6e452b; stroke: #fff7e1; stroke-width: 1.4; }
 .drop.clean svg { fill: #2e9df7; stroke: #fff; stroke-width: 1.6; }
@@ -376,8 +376,8 @@ footer { width: min(1120px,calc(100% - 36px)); justify-content: center; color: #
   .lives-tile #health-label { font-family: "DM Sans",Arial,sans-serif; font-size: 8px; }
   .health-card strong { font-size: 8px; }
   .arena { border-width: 2px; }
-  .player-jug { width: 72px; height: 82px; }
-  .jug-badge { width: 64px; height: 72px; }
+  .player-jug { width: 58px; height: 66px; }
+  .jug-badge { width: 52px; height: 60px; }
   .drop { width: 22px; height: 29px; }
   .game-controls { padding-top: 10px; }
   .key-guide { display: none; }
