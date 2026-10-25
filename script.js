@@ -128,11 +128,12 @@
     moveJug();
   }
 
-  function createThing() {
+  function createThing(kindOverride, xOverride, yOverride) {
     const kindRoll = Math.random();
-    const kind = kindRoll < .62 ? "dirty" : (kindRoll < .91 ? "clean" : "obstacle");
+    const kind = kindOverride || (kindRoll < .7 ? "dirty" : (kindRoll < .94 ? "clean" : "obstacle"));
     const node = document.createElement("div");
-    const x = 7 + Math.random() * 86;
+    const x = typeof xOverride === "number" ? xOverride : 7 + Math.random() * 86;
+    const y = typeof yOverride === "number" ? yOverride : -24;
     if (kind === "obstacle") {
       node.className = "obstacle";
       node.textContent = "✹";
@@ -143,11 +144,21 @@
         (kind === "dirty" ? '<circle cx="11" cy="22" r="1.3" fill="#f5dab0" stroke="none"/><circle cx="17" cy="25" r="1.5" fill="#f5dab0" stroke="none"/>' : '<path d="M9 22c0 2.5 1.5 4.2 3.5 5" fill="none" stroke="#e1fbff" stroke-width="1.5" stroke-linecap="round"/>') + '</svg>';
     }
     node.style.left = x + "%";
-    node.style.top = "-24px";
+    node.style.top = y + "%";
     actors.appendChild(node);
-    things.push({ node, kind, x, y: -24, speed: 58 + Math.random() * 34 });
+    things.push({ node, kind, x, y, speed: 58 + Math.random() * 34 + Math.min(30, cleaned * 1.5) });
   }
 
+  function createWave() {
+    const center = 18 + Math.random() * 64;
+    const spread = cleaned < 4 ? 13 : 17;
+    const offset = Math.random() < .5 ? spread : spread * .72;
+    createThing("dirty", Math.max(7, center - offset), -24);
+    createThing("dirty", Math.min(93, center + offset), -24);
+    if (Math.random() < .38) createThing("dirty", center, -54);
+    if (Math.random() < .55) createThing("clean", 8 + Math.random() * 84, -74);
+    if (Math.random() < .22) createThing("obstacle", 8 + Math.random() * 84, -118);
+  }
   function shoot() {
     if (!running || charges < 1 || shotClock > 0) return;
     charges -= 1;
@@ -223,9 +234,9 @@
     messageClock -= dt;
     if (messageClock <= 0) arenaMessage.classList.add("is-hidden");
     if (spawnClock <= 0) {
-      createThing();
-      const pace = Math.min(.39, cleaned * .012);
-      spawnClock = Math.max(.48, 1.05 - pace) + Math.random() * .26;
+      createWave();
+      const pace = Math.min(.65, cleaned * .035);
+      spawnClock = Math.max(.62, 1.42 - pace) + Math.random() * .28;
     }
     const arenaRect = arena.getBoundingClientRect();
     const width = arenaRect.width;
