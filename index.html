@@ -81,6 +81,11 @@
           <div><span class="stat-label">WATER CHARGES</span><strong id="charge-count">3</strong></div>
           <span class="charge-hint">Collect blue drops to refill</span>
         </div>
+        <div class="health-card">
+          <span class="health-icon" aria-hidden="true">♥</span>
+          <div><span class="stat-label">JERRY'S HEALTH</span><strong id="health-label">3 hits left</strong></div>
+          <div class="health-hearts" id="health-hearts" aria-label="3 hits remaining"><span>♥</span><span>♥</span><span>♥</span></div>
+        </div>
       </div>
 
       <div class="arena" id="arena" aria-label="Game field. Use the arrow keys to move and Space or Z to shoot.">
@@ -119,8 +124,32 @@
           <button type="button" class="pad-button" data-direction="right" aria-label="Move right">→</button>
           <button type="button" class="fire-button" id="fire-button"><span>✦</span> Shoot</button>
         </div>
-        <p class="game-note">Missed drops keep falling. Keep going—there’s no game over.</p>
+        <p class="game-note">Dodge dirty drops. Three hits send Jerry back to the start.</p>
       </div>
+    </section>
+
+    <section class="loading-screen" id="loading-screen" aria-live="polite" hidden>
+      <div class="loading-orbit" aria-hidden="true"><span class="loading-planet"></span><span class="loading-drop"></span></div>
+      <p class="eyebrow"><span class="eyebrow-line"></span> GETTING THE WATER FLOWING</p>
+      <h2>One moment, Jerry…</h2>
+      <div class="fact-card">
+        <span class="fact-label">A CHARITY: WATER FUN FACT</span>
+        <p id="loading-fact"></p>
+        <a id="loading-source" href="https://www.charitywater.org/" target="_blank" rel="noreferrer">Read more <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="lose-screen" id="lose-screen" aria-labelledby="lose-title" hidden>
+      <div class="lose-art" aria-hidden="true"><span class="lose-drop">●</span><span class="lose-spark">✳</span></div>
+      <p class="eyebrow"><span class="eyebrow-line"></span> ROUND OVER</p>
+      <h2 id="lose-title">Jerry took too many dirty water drops.</h2>
+      <p class="lose-copy">The water got a little too muddy this time. Jerry has <strong id="lose-score">0</strong> clean drops to show for it. Ready to give it another go?</p>
+      <div class="fact-card lose-fact-card">
+        <span class="fact-label">WHILE YOU CATCH YOUR BREATH…</span>
+        <p id="lose-fact"></p>
+        <a id="lose-source" href="https://www.charitywater.org/" target="_blank" rel="noreferrer">Read more <span aria-hidden="true">↗</span></a>
+      </div>
+      <button class="play-button" id="lose-replay-button" type="button">Play again <span aria-hidden="true">↻</span></button>
     </section>
 
     <section class="end-screen" id="end-screen" aria-labelledby="end-title" hidden>
