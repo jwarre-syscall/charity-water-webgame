@@ -195,6 +195,7 @@ footer { width:min(1240px,calc(100% - 48px)); min-height:43px; margin:auto; disp
   footer { min-height:39px; font-size:7px; }
   footer a { font-size:8px; }
 }
+@keyframes pop { to { transform:translate(var(--dx),var(--dy)) scale(.15); opacity:0; } }
 @media(prefers-reduced-motion:reduce) {
   *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; transition-duration:.01ms !important; }
 }
