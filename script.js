@@ -71,6 +71,10 @@
   }
 
   function startGame() {
+    try {
+      audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioContext.state === "suspended") audioContext.resume();
+    } catch (_) { /* The game remains playable if audio is unavailable. */ }
     titleScreen.hidden = true;
     endScreen.hidden = true;
     gameScreen.hidden = false;
