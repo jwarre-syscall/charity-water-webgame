@@ -13,53 +13,26 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand" aria-label="charity: water">
-      <span class="brand-jerry" aria-hidden="true"><span></span></span>
-      <span class="brand-name">charity: water</span>
-    </div>
-    <span class="brand-note">A little game for a big cause</span>
+    <span class="brand-note">A game concept inspired by charity: water</span>
   </header>
 
   <main>
     <section class="title-screen" id="title-screen" aria-labelledby="game-title">
       <div class="title-copy">
-        <p class="eyebrow"><span class="eyebrow-line"></span> A CHARITY: WATER GAME</p>
-        <h1 id="game-title">World Wide<br><span>Water</span></h1>
-        <p class="title-description">A little clean water goes a long way.<br>Help bring every drop home.</p>
+        <p class="eyebrow"><span class="eyebrow-line"></span> A WATER-WORLD ADVENTURE</p>
+        <h1 id="game-title">World Wide <span>Water</span></h1>
+        <div class="title-logo-card"><img src="assets/cw_logo_horizontal.png" alt="charity: water"></div>
+        <p class="title-description">Collect clean drops. Clear the muddy ones.<br>Help every drop find its way home.</p>
         <button class="play-button" id="play-button" type="button">Play <span aria-hidden="true">→</span></button>
-        <p class="title-footnote">Move, collect, cleanse. Make waves.</p>
+        <p class="title-footnote">Move Jerry with the arrows · Hold Space to splash</p>
       </div>
-      <div class="planet-scene" aria-hidden="true">
-        <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-        <div class="planet-halo"></div>
-        <svg class="planet" viewBox="0 0 320 320">
-          <defs>
-            <radialGradient id="ocean" cx="32%" cy="27%" r="78%">
-              <stop offset="0" stop-color="#76d7ed"/><stop offset=".6" stop-color="#2e9df7"/><stop offset="1" stop-color="#116baa"/>
-            </radialGradient>
-            <clipPath id="globe-clip"><circle cx="160" cy="160" r="146"/></clipPath>
-            <linearGradient id="globe-gloss" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#092f52" stop-opacity=".23"/>
-            </linearGradient>
-          </defs>
-          <circle cx="160" cy="160" r="149" fill="#0e507c" opacity=".3"/>
-          <circle cx="160" cy="157" r="146" fill="url(#ocean)"/>
-          <g clip-path="url(#globe-clip)" class="continents">
-            <path d="M37 80 61 59 89 62 108 48 137 53 151 73 144 91 125 100 122 121 104 130 97 150 79 155 69 177 50 170 43 144 29 128Z" fill="#4fbd72"/>
-            <path d="m118 160 21-17 28 7 17 23-4 25-17 15-5 36-17 33-16-13-4-34-12-22 4-24-14-14Z" fill="#37aa65"/>
-            <path d="m173 72 27-16 34 6 17 20 22 5 17 22-13 19-28-2-14 19-22-6-11-18-26-3-11-22-16-7Z" fill="#58c77b"/>
-            <path d="m208 153 26-16 26 4 24 19 16 30-10 23-21-3-13-18-25 5-11-20-19-2Z" fill="#3cae65"/>
-            <path d="m76 190 20-8 15 6 5 15-15 12-22-5-11-9Z" fill="#55c77b"/>
-            <path d="M8 46c35-22 76-34 116-39 50-7 105 4 147 27 32 17 55 41 69 68-42-26-88-37-136-34-60 4-111 28-156 67-20 18-36 38-50 61-16-47-13-102 10-150Z" fill="#fff" opacity=".11"/>
-          </g>
-          <circle cx="160" cy="157" r="146" fill="url(#globe-gloss)"/>
-          <path d="M55 69c35-34 79-49 121-49" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>
-        </svg>
-        <span class="planet-spark spark-a">✳</span><span class="planet-spark spark-b">✦</span>
-        <div class="planet-caption"><span class="caption-dot"></span><span>ONE PLANET. EVERY DROP.</span></div>
+      <div class="title-landscape" aria-hidden="true">
+        <div class="pond-water"></div>
+        <div class="pond-shimmer shimmer-one"></div><div class="pond-shimmer shimmer-two"></div>
+        <div class="island island-left"></div><div class="island island-right"></div>
+        <div class="title-globe"><span class="globe-land globe-land-one"></span><span class="globe-land globe-land-two"></span></div>
+        <span class="landscape-drop drop-one"></span><span class="landscape-drop drop-two"></span>
       </div>
-      <div class="title-decoration decoration-a" aria-hidden="true">✳</div>
-      <div class="title-decoration decoration-b" aria-hidden="true">✦</div>
     </section>
 
     <section class="game-screen" id="game-screen" aria-label="Game" hidden>
@@ -70,46 +43,47 @@
         </div>
         <button class="reset-button" id="reset-button" type="button" title="Restart this round">↻ <span>Reset</span></button>
       </div>
-      <div class="game-dashboard">
-        <div class="progress-card">
-          <div class="progress-copy"><span class="stat-label">DIRTY DROPS CLEANSED</span><strong><span id="cleaned-count">0</span><span class="stat-total"> / 12</span></strong></div>
-          <div class="progress-track" role="progressbar" aria-label="Dirty drops cleansed" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><span id="progress-fill"></span></div>
-          <span class="progress-hint">Cleanse 12 drops to help build a well.</span>
-        </div>
-        <div class="water-card">
-          <span class="water-icon" aria-hidden="true">●</span>
-          <div><span class="stat-label">WATER CHARGES</span><strong id="charge-count">3</strong></div>
-          <span class="charge-hint">Collect blue drops to refill</span>
-        </div>
-        <div class="health-card">
-          <span class="health-icon" aria-hidden="true">♥</span>
-          <div><span class="stat-label">JERRY'S HEALTH</span><strong id="health-label">3 hits left</strong></div>
-          <div class="health-hearts" id="health-hearts" aria-label="3 hits remaining"><span>♥</span><span>♥</span><span>♥</span></div>
-        </div>
-      </div>
+      <div class="game-layout">
+        <aside class="score-rail left-rail" aria-label="Clean water and lives">
+          <section class="score-tile saved-tile">
+            <span class="rail-icon clean-icon" aria-hidden="true"></span>
+            <span class="stat-label">WATER SAVED</span>
+            <strong><span id="cleaned-count">0</span><span class="stat-total"> / 12</span></strong>
+            <div class="progress-track" role="progressbar" aria-label="Dirty drops cleansed" aria-valuemin="0" aria-valuemax="12" aria-valuenow="0"><span id="progress-fill"></span></div>
+            <span class="progress-hint">drops cleansed</span>
+          </section>
+          <section class="score-tile lives-tile">
+            <span class="stat-label">JERRY'S LIVES</span>
+            <div class="health-hearts" id="health-hearts" aria-label="3 hits remaining"><span>♥</span><span>♥</span><span>♥</span></div>
+            <strong id="health-label">3 hits left</strong>
+          </section>
+        </aside>
 
-      <div class="arena" id="arena" aria-label="Game field. Use the arrow keys to move and Space or Z to shoot.">
-        <div class="arena-sky"></div><div class="arena-sun"></div>
-        <div class="arena-cloud cloud-a"></div><div class="arena-cloud cloud-b"></div>
-        <div class="arena-hill hill-a"></div><div class="arena-hill hill-b"></div>
-        <div class="arena-water"></div><div class="shore"></div>
-        <div class="actors" id="actors" aria-hidden="true"></div>
-        <div class="shots" id="shots" aria-hidden="true"></div>
-        <div class="particles" id="particles" aria-hidden="true"></div>
-        <div class="player-jug" id="player-jug" style="left:50%;top:79%" aria-label="Your charity: water jug">
-          <span class="jug-glow"></span>
-          <svg viewBox="0 0 100 90" role="img" aria-label="Jerry Can">
-            <path d="M22 34h48a8 8 0 0 1 8 8v30a8 8 0 0 1-8 8H29a8 8 0 0 1-8-8V38a4 4 0 0 1 4-4Z" fill="#ffc907" stroke="#143c5a" stroke-width="4" stroke-linejoin="round"/>
-            <path d="M69 44h12c7 0 12 5 12 12s-5 12-12 12h-5" fill="none" stroke="#143c5a" stroke-width="4" stroke-linecap="round"/>
-            <path d="M33 34v-8c0-10 7-17 17-17s17 7 17 17v8" fill="none" stroke="#143c5a" stroke-width="4" stroke-linecap="round"/>
-            <path d="m78 41 10-10 6 6-11 11" fill="#8bd1cb" stroke="#143c5a" stroke-width="3" stroke-linejoin="round"/>
-            <circle cx="40" cy="51" r="3" fill="#143c5a"/><circle cx="55" cy="51" r="3" fill="#143c5a"/>
-            <path d="M42 61q6 6 12 0" fill="none" stroke="#143c5a" stroke-width="3" stroke-linecap="round"/>
-            <path d="M29 74h40" stroke="#e5a900" stroke-width="2"/>
-          </svg>
-          <span class="jug-label">JERRY</span>
+        <div class="arena" id="arena" aria-label="Game field. Use the arrow keys to move and Space or Z to shoot.">
+          <div class="lane-ripple ripple-one"></div><div class="lane-ripple ripple-two"></div>
+          <div class="actors" id="actors" aria-hidden="true"></div>
+          <div class="shots" id="shots" aria-hidden="true"></div>
+          <div class="particles" id="particles" aria-hidden="true"></div>
+          <div class="player-jug" id="player-jug" style="left:50%;top:79%" aria-label="Jerry Can">
+            <span class="jug-badge"><img src="assets/water-can-transparent.png" alt=""></span>
+          </div>
+          <div class="arena-message" id="arena-message" aria-live="polite">Collect blue drops to power your water shots!</div>
         </div>
-        <div class="arena-message" id="arena-message" aria-live="polite">Collect blue drops to power your water shots!</div>
+
+        <aside class="score-rail right-rail" aria-label="Dirty drops and water charges">
+          <section class="score-tile dirty-tile">
+            <span class="rail-icon dirty-icon" aria-hidden="true"></span>
+            <span class="stat-label">DIRTY DROPS LEFT</span>
+            <strong id="dirty-left-count">12</strong>
+            <span class="progress-hint">cleanse them to build a well</span>
+          </section>
+          <section class="score-tile charges-tile">
+            <span class="rail-icon charge-icon" aria-hidden="true">✦</span>
+            <span class="stat-label">WATER CHARGES</span>
+            <strong id="charge-count">3</strong>
+            <span class="progress-hint">collect blue drops to refill</span>
+          </section>
+        </aside>
       </div>
 
       <div class="game-controls">
@@ -168,7 +142,7 @@
       </div>
     </section>
   </main>
-  <footer><span>World Wide Water is a game concept inspired by charity: water.</span><span class="footer-brand">charity: water <b>·</b> game concept</span></footer>
+  <footer><span>World Wide Water is an educational game concept, not an official charity: water product or donation page.</span></footer>
   <script src="script.js"></script>
 </body>
 </html>

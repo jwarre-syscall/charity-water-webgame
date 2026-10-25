@@ -19,6 +19,7 @@
   const progressFill = document.getElementById("progress-fill");
   const progressBar = document.querySelector(".progress-track");
   const chargeCount = document.getElementById("charge-count");
+  const dirtyLeftCount = document.getElementById("dirty-left-count");
   const healthLabel = document.getElementById("health-label");
   const healthHearts = document.getElementById("health-hearts");
   const arenaMessage = document.getElementById("arena-message");
@@ -57,6 +58,7 @@
   function updateHud() {
     cleanedCount.textContent = String(cleaned);
     chargeCount.textContent = String(charges);
+    dirtyLeftCount.textContent = String(Math.max(0, goal - cleaned));
     healthLabel.textContent = health === 1 ? "1 hit left" : health + " hits left";
     healthHearts.setAttribute("aria-label", health + (health === 1 ? " hit remaining" : " hits remaining"));
     Array.from(healthHearts.children).forEach((heart, index) => heart.classList.toggle("is-lost", index >= health));
@@ -240,7 +242,7 @@
   function cleanse(thing) {
     thing.node.remove();
     sound(850 + Math.random() * 220, .15, "triangle");
-    burst(thing.x, thing.y, "#8fe9f2", 9);
+    burst(thing.x, thing.y, "#77a8bb", 9);
     cleaned += 1;
     charges = Math.min(9, charges + 1);
     updateHud();
@@ -252,7 +254,7 @@
     thing.node.remove();
     charges = Math.min(9, charges + 2);
     updateHud();
-    burst(thing.x, thing.y, "#54d8f0", 7);
+    burst(thing.x, thing.y, "#2e9df7", 7);
     say("Fresh water collected. +2 shots!");
     sound(700, .14, "sine");
   }
@@ -361,7 +363,7 @@
   function makeConfetti() {
     const box = document.getElementById("confetti");
     box.replaceChildren();
-    const colors = ["#ffc907", "#2e9df7", "#8bd1cb", "#4fbd72", "#f27b5c"];
+    const colors = ["#ffc907", "#2e9df7", "#77a8bb", "#8bd1cb", "#bf6c46"];
     for (let i = 0; i < 76; i += 1) {
       const piece = document.createElement("span");
       piece.className = "confetti-piece";
