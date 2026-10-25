@@ -1,255 +1,338 @@
 (() => {
   "use strict";
 
-  const field = document.getElementById("playfield");
-  const player = document.getElementById("player");
-  const items = document.getElementById("game-items");
-  const startScreen = document.getElementById("start-screen");
+  const titleScreen = document.getElementById("title-screen");
+  const gameScreen = document.getElementById("game-screen");
   const endScreen = document.getElementById("end-screen");
-  const startButton = document.getElementById("start-button");
-  const againButton = document.getElementById("again-button");
-  const pauseButton = document.getElementById("pause-button");
-  const scoreValue = document.getElementById("score-value");
-  const scoreFill = document.getElementById("score-meter-fill");
-  const livesView = document.getElementById("lives");
-  const timerLabel = document.getElementById("timer-label");
-  const gameStatus = document.getElementById("game-status");
-  const statusText = document.getElementById("status-text");
-  const toast = document.getElementById("toast");
-  const soundToggle = document.getElementById("sound-toggle");
+  const playButton = document.getElementById("play-button");
+  const resetButton = document.getElementById("reset-button");
+  const replayButton = document.getElementById("replay-button");
+  const arena = document.getElementById("arena");
+  const jug = document.getElementById("player-jug");
+  const actors = document.getElementById("actors");
+  const shotsLayer = document.getElementById("shots");
+  const particles = document.getElementById("particles");
+  const cleanedCount = document.getElementById("cleaned-count");
+  const progressFill = document.getElementById("progress-fill");
+  const progressBar = document.querySelector(".progress-track");
+  const chargeCount = document.getElementById("charge-count");
+  const arenaMessage = document.getElementById("arena-message");
+  const fireButton = document.getElementById("fire-button");
   const goal = 12;
-  const duration = 60;
 
-  let score = 0;
-  let lives = 3;
-  let remaining = duration;
-  let playerX = 50;
-  let drops = [];
-  let active = false;
-  let paused = false;
+  let player = { x: 50, y: 79 };
+  let cleaned = 0;
+  let charges = 3;
+  let things = [];
+  let bullets = [];
+  let keys = new Set();
+  let running = false;
   let lastFrame = 0;
   let spawnClock = 0;
-  let secondClock = 0;
-  let toastClock = 0;
-  let soundOn = false;
-  let audioContext = null;
+  let shotClock = 0;
+  let messageClock = 2.4;
+  let shootHeld = false;
+  let audioContext;
+  let pointerMoving = false;
+  let lastPointer = null;
 
-  function formatTime(seconds) {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  const keyMap = {
+    ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
+    a: "left", A: "left", d: "right", D: "right", w: "up", W: "up", s: "down", S: "down"
+  };
+
+  function updateHud() {
+    cleanedCount.textContent = String(cleaned);
+    chargeCount.textContent = String(charges);
+    progressFill.style.width = Math.min(100, cleaned / goal * 100) + "%";
+    progressBar.setAttribute("aria-valuenow", String(cleaned));
   }
 
-  function setStatus(text, mode) {
-    statusText.textContent = text;
-    gameStatus.classList.remove("is-playing", "is-paused");
-    if (mode) gameStatus.classList.add(mode);
+  function say(message) {
+    arenaMessage.textContent = message;
+    arenaMessage.classList.remove("is-hidden");
+    messageClock = 1.8;
   }
 
-  function showToast(message) {
-    toast.textContent = message;
-    toast.classList.add("is-visible");
-    toastClock = 1.15;
-  }
-
-  function renderStats() {
-    scoreValue.innerHTML = String(score) + '<span class="score-goal"> / ' + goal + '</span>';
-    scoreFill.style.width = Math.min(100, score / goal * 100) + "%";
-    livesView.setAttribute("aria-label", lives + (lives === 1 ? " life remaining" : " lives remaining"));
-    Array.from(livesView.children).forEach((heart, index) => {
-      heart.classList.toggle("is-lost", index >= lives);
-    });
-    timerLabel.textContent = formatTime(remaining);
-  }
-
-  function resetGame() {
-    score = 0;
-    lives = 3;
-    remaining = duration;
-    playerX = 50;
-    drops = [];
-    items.replaceChildren();
-    player.style.left = playerX + "%";
-    player.classList.remove("is-happy");
-    renderStats();
-  }
-
-  function startGame() {
-    resetGame();
-    startScreen.hidden = true;
-    endScreen.hidden = true;
-    active = true;
-    paused = false;
-    pauseButton.disabled = false;
-    pauseButton.textContent = "Pause";
-    lastFrame = 0;
-    spawnClock = 0.4;
-    secondClock = 0;
-    setStatus("You’ve got this!", "is-playing");
-    field.focus({ preventScroll: true });
-    requestAnimationFrame(loop);
-  }
-
-  function finishGame(won, reason) {
-    if (!active) return;
-    active = false;
-    paused = false;
-    pauseButton.disabled = true;
-    pauseButton.textContent = "Pause";
-    setStatus(won ? "A little more hope in the world" : "Round complete", "");
-    document.getElementById("end-eyebrow").textContent = won ? "MISSION COMPLETE" : "ROUND COMPLETE";
-    document.getElementById("end-title").textContent = won ? "You made waves!" : (reason === "time" ? "Time for a deep breath." : "Keep making waves.");
-    document.getElementById("end-message").textContent = won
-      ? "You caught " + score + " clean drops. That’s a lot of good."
-      : (reason === "time" ? "You caught " + score + " of " + goal + " clean drops. Every drop counts." : "You caught " + score + " clean drops. Give it another go?");
-    document.getElementById("end-illustration").textContent = won ? "✳" : "✦";
-    endScreen.hidden = false;
-    againButton.focus({ preventScroll: true });
-  }
-
-  function move(direction) {
-    if (!active || paused) return;
-    playerX = Math.max(8, Math.min(92, playerX + direction * 7));
-    player.style.left = playerX + "%";
-  }
-
-  function createDrop() {
-    const node = document.createElement("div");
-    const dirty = Math.random() < 0.29;
-    node.className = "drop " + (dirty ? "dirty" : "clean");
-    node.innerHTML = '<svg viewBox="0 0 28 36" aria-hidden="true"><path d="M14 1.8C10 8.6 3.8 15.2 3.8 22a10.2 10.2 0 0 0 20.4 0C24.2 15.2 18 8.6 14 1.8Z"/>' +
-      (dirty ? '<circle cx="11" cy="22" r="1.25" fill="#f6d9a6" stroke="none"/><circle cx="17" cy="25" r="1.4" fill="#f6d9a6" stroke="none"/>' : '<path d="M9 22c0 2.5 1.5 4.2 3.5 5" fill="none" stroke="#dffaff" stroke-width="1.5" stroke-linecap="round"/>') + '</svg>';
-    node.setAttribute("data-kind", dirty ? "dirty" : "clean");
-    const x = 8 + Math.random() * 84;
-    node.style.left = x + "%";
-    node.style.top = "-24px";
-    items.appendChild(node);
-    drops.push({ node, x, y: -24, speed: 115 + Math.random() * 55, dirty });
-  }
-
-  function playTone(frequency, length, type) {
-    if (!soundOn) return;
+  function sound(frequency, duration, type) {
     try {
       audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
       oscillator.type = type || "sine";
-      oscillator.frequency.value = frequency;
-      gain.gain.setValueAtTime(0.045, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + length);
+      oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+      gain.gain.setValueAtTime(.045, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.001, audioContext.currentTime + duration);
       oscillator.connect(gain);
       gain.connect(audioContext.destination);
       oscillator.start();
-      oscillator.stop(audioContext.currentTime + length);
-    } catch (_) { /* Sound is optional; the game remains fully playable. */ }
+      oscillator.stop(audioContext.currentTime + duration);
+    } catch (_) { /* Audio can be unavailable; visual play still works. */ }
   }
 
-  function collect(drop) {
-    if (drop.dirty) {
-      lives = Math.max(0, lives - 1);
-      showToast(lives ? "Muddy drop! Watch your step." : "That’s okay. Take another try.");
-      playTone(155, .2, "triangle");
-      renderStats();
-      if (!lives) finishGame(false, "lives");
-      return;
+  function startGame() {
+    titleScreen.hidden = true;
+    endScreen.hidden = true;
+    gameScreen.hidden = false;
+    cleaned = 0;
+    charges = 3;
+    player = { x: 50, y: 79 };
+    things.forEach(item => item.node.remove());
+    bullets.forEach(item => item.node.remove());
+    things = [];
+    bullets = [];
+    keys.clear();
+    running = true;
+    lastFrame = 0;
+    spawnClock = .5;
+    shotClock = 0;
+    messageClock = 3;
+    arenaMessage.textContent = "Collect blue drops to power your water shots!";
+    arenaMessage.classList.remove("is-hidden");
+    moveJug();
+    updateHud();
+    arena.focus({ preventScroll: true });
+    requestAnimationFrame(frame);
+  }
+
+  function endGame() {
+    if (!running) return;
+    running = false;
+    keys.clear();
+    shootHeld = false;
+    document.getElementById("final-score").textContent = String(cleaned);
+    gameScreen.hidden = true;
+    endScreen.hidden = false;
+    makeConfetti();
+    replayButton.focus({ preventScroll: true });
+  }
+
+  function moveJug() {
+    jug.style.left = player.x + "%";
+    jug.style.top = player.y + "%";
+  }
+
+  function move(direction, amount) {
+    if (!running) return;
+    const step = amount || 4.3;
+    if (direction === "left") player.x -= step;
+    if (direction === "right") player.x += step;
+    if (direction === "up") player.y -= step;
+    if (direction === "down") player.y += step;
+    player.x = Math.max(6, Math.min(94, player.x));
+    player.y = Math.max(17, Math.min(88, player.y));
+    moveJug();
+  }
+
+  function createThing() {
+    const kindRoll = Math.random();
+    const kind = kindRoll < .62 ? "dirty" : (kindRoll < .91 ? "clean" : "obstacle");
+    const node = document.createElement("div");
+    const x = 7 + Math.random() * 86;
+    if (kind === "obstacle") {
+      node.className = "obstacle";
+      node.textContent = "✹";
+      node.setAttribute("aria-label", "Muddy cloud");
+    } else {
+      node.className = "drop " + kind;
+      node.innerHTML = '<svg viewBox="0 0 28 36" aria-hidden="true"><path d="M14 1.8C10 8.6 3.8 15.2 3.8 22a10.2 10.2 0 0 0 20.4 0C24.2 15.2 18 8.6 14 1.8Z"/>' +
+        (kind === "dirty" ? '<circle cx="11" cy="22" r="1.3" fill="#f5dab0" stroke="none"/><circle cx="17" cy="25" r="1.5" fill="#f5dab0" stroke="none"/>' : '<path d="M9 22c0 2.5 1.5 4.2 3.5 5" fill="none" stroke="#e1fbff" stroke-width="1.5" stroke-linecap="round"/>') + '</svg>';
     }
-    score += 1;
-    player.classList.remove("is-happy");
-    void player.offsetWidth;
-    player.classList.add("is-happy");
-    showToast(score >= goal ? "You brought clean water home!" : "Clean drop saved!");
-    playTone(610 + score * 17, .12);
-    renderStats();
-    if (score >= goal) finishGame(true, "goal");
+    node.style.left = x + "%";
+    node.style.top = "-24px";
+    actors.appendChild(node);
+    things.push({ node, kind, x, y: -24, speed: 58 + Math.random() * 34 });
   }
 
-  function loop(timestamp) {
-    if (!active || paused) return;
-    const delta = Math.min((timestamp - (lastFrame || timestamp)) / 1000, .05);
+  function shoot() {
+    if (!running || charges < 1 || shotClock > 0) return;
+    charges -= 1;
+    updateHud();
+    const node = document.createElement("span");
+    node.className = "shot";
+    const y = player.y - 5.5;
+    node.style.left = player.x + "%";
+    node.style.top = y + "%";
+    shotsLayer.appendChild(node);
+    bullets.push({ node, x: player.x, y: y, speed: 53 });
+    shotClock = .18;
+    sound(540 + Math.random() * 100, .07);
+  }
+
+  function burst(x, y, color, count) {
+    for (let i = 0; i < count; i += 1) {
+      const dot = document.createElement("span");
+      dot.className = "particle";
+      const angle = Math.PI * 2 * i / count;
+      const distance = 16 + Math.random() * 23;
+      dot.style.cssText = "position:absolute;left:" + x + "%;top:" + y + "%;width:" + (4 + Math.random() * 4) + "px;height:" + (4 + Math.random() * 4) + "px;border-radius:50%;background:" + color + ";--dx:" + Math.cos(angle) * distance + "px;--dy:" + Math.sin(angle) * distance + "px;animation:pop .55s ease-out forwards";
+      particles.appendChild(dot);
+      window.setTimeout(() => dot.remove(), 600);
+    }
+  }
+
+  function cleanse(thing) {
+    thing.node.remove();
+    sound(850 + Math.random() * 220, .15, "triangle");
+    burst(thing.x, thing.y, "#8fe9f2", 9);
+    cleaned += 1;
+    charges = Math.min(9, charges + 1);
+    updateHud();
+    say(cleaned >= goal ? "The water is clean. A well is on its way!" : "Cleaned! " + (goal - cleaned) + " more to go.");
+    if (cleaned >= goal) endGame();
+  }
+
+  function collect(thing) {
+    thing.node.remove();
+    charges = Math.min(9, charges + 2);
+    updateHud();
+    burst(thing.x, thing.y, "#54d8f0", 7);
+    say("Fresh water collected. +2 shots!");
+    sound(700, .14, "sine");
+  }
+
+  function hitObstacle(thing) {
+    thing.node.remove();
+    charges = Math.max(0, charges - 1);
+    cleaned = Math.max(0, cleaned - 1);
+    updateHud();
+    burst(thing.x, thing.y, "#d69a67", 8);
+    say("Muddy cloud! One point and one water charge lost.");
+    sound(180, .2, "triangle");
+  }
+
+  function overlaps(a, b, radiusX, radiusY) {
+    return Math.abs(a.x - b.x) < radiusX && Math.abs(a.y - b.y) < radiusY;
+  }
+
+  function frame(timestamp) {
+    if (!running) return;
+    const dt = Math.min((timestamp - (lastFrame || timestamp)) / 1000, .04);
     lastFrame = timestamp;
-    spawnClock -= delta;
-    secondClock += delta;
+    if (keys.has("left")) move("left", 4.5 * dt * 60);
+    if (keys.has("right")) move("right", 4.5 * dt * 60);
+    if (keys.has("up")) move("up", 4.5 * dt * 60);
+    if (keys.has("down")) move("down", 4.5 * dt * 60);
+    if (shootHeld) shoot();
+    shotClock = Math.max(0, shotClock - dt);
+    spawnClock -= dt;
+    messageClock -= dt;
+    if (messageClock <= 0) arenaMessage.classList.add("is-hidden");
     if (spawnClock <= 0) {
-      createDrop();
-      spawnClock = Math.max(.48, 1.02 - (duration - remaining) * .007) + Math.random() * .3;
+      createThing();
+      const pace = Math.min(.39, cleaned * .012);
+      spawnClock = Math.max(.48, 1.05 - pace) + Math.random() * .26;
     }
-    while (secondClock >= 1) {
-      secondClock -= 1;
-      remaining = Math.max(0, remaining - 1);
-      renderStats();
-      if (!remaining) {
-        finishGame(score >= goal, "time");
-        return;
+    const arenaRect = arena.getBoundingClientRect();
+    const width = arenaRect.width;
+    const height = arenaRect.height;
+    const px = player.x / 100 * width;
+    const py = player.y / 100 * height;
+
+    bullets = bullets.filter((bullet) => {
+      bullet.y -= bullet.speed * dt;
+      bullet.node.style.top = bullet.y + "%";
+      let hitIndex = -1;
+      for (let i = 0; i < things.length; i += 1) {
+        if (things[i].kind === "dirty" && overlaps(bullet, things[i], 4.5, 4.7)) { hitIndex = i; break; }
       }
-    }
-    if (toastClock > 0) {
-      toastClock -= delta;
-      if (toastClock <= 0) toast.classList.remove("is-visible");
-    }
-    const fieldRect = field.getBoundingClientRect();
-    const playerRect = player.getBoundingClientRect();
-    const playerCenter = playerX / 100 * fieldRect.width;
-    const catchY = fieldRect.height * .87;
-    drops = drops.filter((drop) => {
-      drop.y += drop.speed * delta;
-      drop.node.style.top = drop.y + "px";
-      if (drop.y >= catchY - 15 && drop.y <= catchY + 20 && Math.abs(drop.x / 100 * fieldRect.width - playerCenter) < playerRect.width * .47) {
-        drop.node.remove();
-        collect(drop);
-        return active;
-      }
-      if (drop.y > fieldRect.height + 30) {
-        drop.node.remove();
+      if (hitIndex >= 0) {
+        cleanse(things[hitIndex]);
+        things.splice(hitIndex, 1);
+        bullet.node.remove();
         return false;
       }
+      if (bullet.y < -5) { bullet.node.remove(); return false; }
       return true;
     });
-    if (active) requestAnimationFrame(loop);
+
+    things = things.filter((thing) => {
+      thing.y += thing.speed * dt / height * 100;
+      thing.node.style.top = thing.y + "%";
+      const thingPx = thing.x / 100 * width;
+      const thingPy = thing.y / 100 * height;
+      if (thing.kind === "clean" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 38, 39)) {
+        collect(thing);
+        return false;
+      }
+      if (thing.kind === "obstacle" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 38, 35)) {
+        hitObstacle(thing);
+        return false;
+      }
+      if (thing.y > 104) { thing.node.remove(); return false; }
+      return true;
+    });
+    if (running) requestAnimationFrame(frame);
   }
 
-  startButton.addEventListener("click", startGame);
-  againButton.addEventListener("click", startGame);
-  pauseButton.addEventListener("click", () => {
-    if (!active) return;
-    paused = !paused;
-    pauseButton.textContent = paused ? "Resume" : "Pause";
-    setStatus(paused ? "Taking a breather" : "You’ve got this!", paused ? "is-paused" : "is-playing");
-    if (!paused) {
-      lastFrame = 0;
-      requestAnimationFrame(loop);
+  function makeConfetti() {
+    const box = document.getElementById("confetti");
+    box.replaceChildren();
+    const colors = ["#ffc907", "#2e9df7", "#8bd1cb", "#4fbd72", "#f27b5c"];
+    for (let i = 0; i < 76; i += 1) {
+      const piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      piece.style.left = Math.random() * 100 + "%";
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty("--drift", (Math.random() * 140 - 70) + "px");
+      piece.style.setProperty("--fall-time", (1.3 + Math.random() * 1.7) + "s");
+      piece.style.animationDelay = (Math.random() * .8) + "s";
+      box.appendChild(piece);
+    }
+    window.setTimeout(() => box.replaceChildren(), 3800);
+  }
+
+  playButton.addEventListener("click", startGame);
+  replayButton.addEventListener("click", startGame);
+  resetButton.addEventListener("click", startGame);
+
+  document.addEventListener("keydown", (event) => {
+    if (keyMap[event.key]) {
+      event.preventDefault();
+      keys.add(keyMap[event.key]);
+    }
+    if ((event.code === "Space" || event.key === "z" || event.key === "Z") && running) {
+      event.preventDefault();
+      shootHeld = true;
     }
   });
-  document.addEventListener("keydown", (event) => {
-    if (["ArrowLeft", "ArrowRight", "a", "A", "d", "D"].includes(event.key)) event.preventDefault();
-    if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") move(-1);
-    if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") move(1);
-    if (event.key === " " && !active) startGame();
-    if (event.key === "Escape" && active) pauseButton.click();
+  document.addEventListener("keyup", (event) => {
+    if (keyMap[event.key]) keys.delete(keyMap[event.key]);
+    if (event.code === "Space" || event.key === "z" || event.key === "Z") shootHeld = false;
   });
-  document.querySelectorAll("[data-move]").forEach((button) => {
+  window.addEventListener("blur", () => { keys.clear(); shootHeld = false; });
+
+  document.querySelectorAll("[data-direction]").forEach((button) => {
+    const direction = button.dataset.direction;
     button.addEventListener("pointerdown", (event) => {
       event.preventDefault();
-      move(Number(button.dataset.move));
+      keys.add(direction);
+      button.setPointerCapture(event.pointerId);
+    });
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach((name) => {
+      button.addEventListener(name, () => keys.delete(direction));
     });
   });
-  field.addEventListener("pointermove", (event) => {
-    if (!active || paused || event.pointerType !== "touch" || event.buttons !== 1) return;
-    const rect = field.getBoundingClientRect();
-    playerX = Math.max(8, Math.min(92, (event.clientX - rect.left) / rect.width * 100));
-    player.style.left = playerX + "%";
+  fireButton.addEventListener("pointerdown", (event) => { event.preventDefault(); shootHeld = true; });
+  ["pointerup", "pointercancel", "pointerleave"].forEach((name) => fireButton.addEventListener(name, () => { shootHeld = false; }));
+
+  arena.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch" || !running) return;
+    pointerMoving = true;
+    lastPointer = { x: event.clientX, y: event.clientY };
+    arena.setPointerCapture(event.pointerId);
   });
-  field.addEventListener("pointerdown", (event) => {
-    if (!active || paused || event.pointerType !== "touch") return;
-    const rect = field.getBoundingClientRect();
-    playerX = Math.max(8, Math.min(92, (event.clientX - rect.left) / rect.width * 100));
-    player.style.left = playerX + "%";
+  arena.addEventListener("pointermove", (event) => {
+    if (!pointerMoving || !lastPointer) return;
+    const rect = arena.getBoundingClientRect();
+    player.x = Math.max(6, Math.min(94, player.x + (event.clientX - lastPointer.x) / rect.width * 100));
+    player.y = Math.max(17, Math.min(88, player.y + (event.clientY - lastPointer.y) / rect.height * 100));
+    lastPointer = { x: event.clientX, y: event.clientY };
+    moveJug();
   });
-  soundToggle.addEventListener("click", () => {
-    soundOn = !soundOn;
-    soundToggle.setAttribute("aria-pressed", String(soundOn));
-    soundToggle.setAttribute("aria-label", soundOn ? "Turn sound off" : "Turn sound on");
-    showToast(soundOn ? "Sound is on" : "Sound is off");
-    if (soundOn) playTone(520, .12);
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((name) => {
+    arena.addEventListener(name, () => { pointerMoving = false; lastPointer = null; });
   });
-  renderStats();
+
+  updateHud();
 })();
