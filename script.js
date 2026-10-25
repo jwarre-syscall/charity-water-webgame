@@ -249,6 +249,7 @@
       if (bullet.y < -5) { bullet.node.remove(); return false; }
       return true;
     });
+    if (!running) return;
 
     things = things.filter((thing) => {
       thing.y += thing.speed * dt / height * 100;
