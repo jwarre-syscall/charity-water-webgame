@@ -59,7 +59,7 @@ main { width:min(1240px,calc(100% - 48px)); margin:0 auto; }
 .game-header h2 { margin:0; color:var(--navy); font-family:Fraunces,Georgia,serif; font-size:32px; letter-spacing:-.7px; }
 .reset-button { display:flex; align-items:center; gap:7px; padding:9px 12px; border:1px solid #e3e7e2; border-radius:8px; background:#fff; color:#63767a; font-size:11px; font-weight:700; cursor:pointer; }
 .reset-button:hover { border-color:#d4bd62; color:var(--navy); background:#fff9e4; }
-.game-dashboard { display:grid; grid-template-columns:1.35fr 1fr; gap:12px; margin-bottom:12px; }
+.game-dashboard { display:grid; grid-template-columns:1.35fr .9fr .9fr; gap:12px; margin-bottom:12px; }
 .progress-card,.water-card { min-height:83px; border:1px solid #ecebe2; border-radius:12px; background:white; padding:14px 18px; box-shadow:0 5px 16px rgba(25,55,67,.035); }
 .progress-copy { display:flex; align-items:baseline; justify-content:space-between; }
 .stat-label { display:block; color:#829195; font-size:8px; font-weight:800; letter-spacing:1.3px; }
@@ -69,6 +69,12 @@ main { width:min(1240px,calc(100% - 48px)); margin:0 auto; }
 .progress-track span { display:block; width:0; height:100%; border-radius:inherit; background:linear-gradient(90deg,#51c6da,#2e9df7); transition:width .25s ease; }
 .progress-hint { display:block; margin-top:6px; color:#9aa5a3; font-size:8px; }
 .water-card { display:flex; align-items:center; gap:11px; }
+.health-card { min-height:83px; display:flex; align-items:center; gap:9px; padding:12px 15px; border:1px solid #ecebe2; border-radius:12px; background:white; box-shadow:0 5px 16px rgba(25,55,67,.035); }
+.health-icon { color:#e97968; font-size:18px; }
+.health-card strong { display:block; margin-top:4px; color:var(--navy); font-size:11px; }
+.health-hearts { display:flex; gap:2px; margin-left:auto; color:#ef7868; font-size:15px; }
+.health-hearts span { transition:opacity .2s,transform .2s; }
+.health-hearts .is-lost { opacity:.18; transform:scale(.8); }
 .water-icon { display:grid; place-items:center; width:35px; height:35px; border-radius:11px; color:#fff; background:var(--blue); font-size:14px; box-shadow:inset 0 -5px 0 rgba(0,64,126,.1); }
 .water-card strong { display:block; margin-top:4px; color:var(--navy); font-family:Fraunces,Georgia,serif; font-size:22px; line-height:1; }
 .charge-hint { margin-left:auto; color:#98a4a2; font-size:9px; }
@@ -111,6 +117,27 @@ kbd { min-width:22px; height:21px; display:grid; place-items:center; border:1px 
 .key-guide i { height:20px; width:1px; margin:0 5px; background:#e2e4de; }
 .game-note { margin:0; color:#a0a8a3; font-size:9px; }
 .touch-pad { display:none; }
+.loading-screen,.lose-screen { position:relative; min-height:calc(100vh - 120px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:38px 20px 48px; text-align:center; }
+.loading-screen>.eyebrow,.lose-screen>.eyebrow { justify-content:center; margin:18px 0 8px; }
+.loading-screen h2,.lose-screen h2 { max-width:680px; margin:0; color:var(--navy); font-family:Fraunces,Georgia,serif; font-size:clamp(30px,5vw,48px); line-height:1.1; letter-spacing:-1px; }
+.loading-orbit { position:relative; display:grid; place-items:center; width:92px; height:92px; margin-bottom:5px; border:1px solid rgba(46,157,247,.22); border-radius:50%; animation:orbit-spin 3s linear infinite; }
+.loading-planet { width:50px; height:50px; border-radius:50%; background:radial-gradient(circle at 30% 26%,#7ad9e8,#2e9df7 58%,#146da8); box-shadow:inset -7px -5px 10px rgba(7,64,108,.18),0 5px 13px rgba(36,118,149,.18); }
+.loading-drop { position:absolute; top:3px; left:39px; width:12px; height:15px; border-radius:55% 55% 60% 60%; background:var(--yellow); box-shadow:0 0 0 4px rgba(255,201,7,.14); }
+.fact-card { width:min(100%,500px); margin:18px auto 0; padding:19px 23px 17px; border:1px solid #efe5c6; border-radius:13px; background:#fff9e4; text-align:left; }
+.fact-label { color:#8a7540; font-size:8px; font-weight:800; letter-spacing:1.3px; }
+.fact-card p { margin:9px 0 10px; color:#4d6268; font-family:Fraunces,Georgia,serif; font-size:17px; line-height:1.45; }
+.fact-card a { color:#347d9d; font-size:9px; font-weight:800; text-decoration:none; }
+.fact-card a:hover { text-decoration:underline; }
+.lose-art { position:relative; display:grid; place-items:center; width:76px; height:76px; margin-bottom:7px; border-radius:50%; background:#fff0e5; }
+.lose-drop { color:#9b633a; font-size:37px; text-shadow:0 5px 0 #d29b6d; }
+.lose-spark { position:absolute; top:1px; right:0; color:var(--yellow-deep); font-size:19px; }
+.lose-copy { max-width:510px; margin:14px 0 0; color:#6b7d82; font-size:13px; line-height:1.7; }
+.lose-copy strong { color:var(--blue-deep); }
+.lose-fact-card { margin-top:16px; margin-bottom:20px; }
+.lose-screen .play-button { min-width:185px; }
+.player-jug.is-hit { animation:jug-hit .62s ease-out; }
+@keyframes jug-hit { 15%,55% { opacity:.25; filter:brightness(1.7) drop-shadow(0 0 9px #f08f60); } 100% { opacity:1; } }
+@keyframes orbit-spin { to { transform:rotate(360deg); } }
 .end-screen { position:relative; min-height:calc(100vh - 120px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px 55px; text-align:center; overflow:hidden; }
 .well-art { position:relative; width:180px; height:155px; margin:0 auto 22px; }
 .well-sun { position:absolute; top:3px; right:15px; width:37px; height:37px; border-radius:50%; background:var(--yellow); box-shadow:0 0 0 9px rgba(255,201,7,.13); }
@@ -167,6 +194,8 @@ footer { width:min(1240px,calc(100% - 48px)); min-height:43px; margin:auto; disp
   .reset-button { padding:8px 9px; }
   .game-dashboard { grid-template-columns:1.25fr .75fr; gap:8px; margin-bottom:9px; }
   .progress-card,.water-card { min-height:78px; padding:11px 12px; }
+  .health-card { grid-column:1 / -1; min-height:51px; padding:8px 12px; }
+  .health-hearts { font-size:17px; }
   .progress-copy strong { font-size:21px; }
   .stat-label { font-size:7px; letter-spacing:.9px; }
   .progress-hint { font-size:7px; }
