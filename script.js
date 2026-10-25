@@ -171,7 +171,7 @@
 
   function move(direction, amount) {
     if (!running) return;
-    const step = amount || 4.3;
+    const step = amount || 1.25;
     if (direction === "left") player.x -= step;
     if (direction === "right") player.x += step;
     if (direction === "up") player.y -= step;
@@ -297,10 +297,10 @@
     if (!running) return;
     const dt = Math.min((timestamp - (lastFrame || timestamp)) / 1000, .04);
     lastFrame = timestamp;
-    if (keys.has("left")) move("left", 4.5 * dt * 60);
-    if (keys.has("right")) move("right", 4.5 * dt * 60);
-    if (keys.has("up")) move("up", 4.5 * dt * 60);
-    if (keys.has("down")) move("down", 4.5 * dt * 60);
+    if (keys.has("left")) move("left", 1.25 * dt * 60);
+    if (keys.has("right")) move("right", 1.25 * dt * 60);
+    if (keys.has("up")) move("up", 1.25 * dt * 60);
+    if (keys.has("down")) move("down", 1.25 * dt * 60);
     if (shootHeld) shoot();
     shotClock = Math.max(0, shotClock - dt);
     damageCooldown = Math.max(0, damageCooldown - dt);
@@ -342,15 +342,15 @@
       thing.node.style.top = thing.y + "%";
       const thingPx = thing.x / 100 * width;
       const thingPy = thing.y / 100 * height;
-      if (thing.kind === "clean" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 38, 39)) {
+      if (thing.kind === "clean" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 31, 32)) {
         collect(thing);
         return false;
       }
-      if (thing.kind === "dirty" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 34, 34)) {
+      if (thing.kind === "dirty" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 27, 28)) {
         hitByDirtyDrop(thing);
         return false;
       }
-      if (thing.kind === "obstacle" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 38, 35)) {
+      if (thing.kind === "obstacle" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 30, 29)) {
         hitObstacle(thing);
         return false;
       }
