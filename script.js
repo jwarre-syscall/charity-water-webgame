@@ -335,6 +335,7 @@
     if (!running) return;
 
     things = things.filter((thing) => {
+      if (!running) { thing.node.remove(); return false; }
       thing.y += thing.speed * dt / height * 100;
       thing.node.style.top = thing.y + "%";
       const thingPx = thing.x / 100 * width;
