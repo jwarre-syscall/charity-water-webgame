@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffc907">
+  <meta name="description" content="Play World Wide Water, a small game about bringing clean water home.">
+  <title>World Wide Water — charity: water</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="World Wide Water home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span class="brand-copy"><strong>charity: water</strong><small>WORLD WIDE WATER</small></span>
+      </a>
+      <div class="topbar-note"><span class="live-dot"></span> A little game for a big cause</div>
+      <button class="icon-button" id="sound-toggle" type="button" aria-label="Turn sound on" aria-pressed="false" title="Toggle sound">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Z"/><path d="M16 9a5 5 0 0 1 0 6M18.5 6.5a9 9 0 0 1 0 11"/></svg>
+      </button>
+    </header>
+
+    <main>
+      <section class="intro-row">
+        <div>
+          <p class="eyebrow">A WORLD OF WATER</p>
+          <h1>Every drop<br class="mobile-break"> makes a difference.</h1>
+        </div>
+        <p class="intro-copy">Catch the clean drops. Leave the dirty ones behind.<br>Bring clean water home, one drop at a time.</p>
+      </section>
+
+      <section class="game-layout" aria-label="World Wide Water game">
+        <aside class="mission-card">
+          <div class="mission-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48"><path d="M24 5C19 13 11 21 11 29a13 13 0 0 0 26 0c0-8-8-16-13-24Z"/><path class="shine" d="M18 30c0 3 2 5 5 6"/></svg>
+          </div>
+          <p class="eyebrow">YOUR MISSION</p>
+          <h2>Bring the good stuff home.</h2>
+          <p class="mission-copy">Move your water can to catch bright blue drops. Dodge the muddy ones to keep your three lives.</p>
+          <div class="howto">
+            <div><span class="keycap">←</span><span class="keycap">→</span><span>Move</span></div>
+            <div><span class="keycap keycap-wide">A</span><span class="keycap keycap-wide">D</span><span>or use the buttons</span></div>
+          </div>
+          <div class="mission-footer">
+            <span class="mini-sun" aria-hidden="true">✳</span>
+            <span>Hope looks good on everyone.</span>
+          </div>
+        </aside>
+
+        <div class="game-card">
+          <div class="game-card-top">
+            <div class="game-heading">
+              <div class="game-title-lockup"><span class="tiny-drop" aria-hidden="true"></span><div><span class="eyebrow">WORLD WIDE</span><h2>Water</h2></div></div>
+              <p class="round-label">ROUND <strong id="round-number">01</strong></p>
+            </div>
+            <div class="game-status" id="game-status" aria-live="polite"><span class="status-dot"></span><span id="status-text">Ready when you are</span></div>
+          </div>
+
+          <div class="playfield" id="playfield" aria-label="Game play area. Use arrow keys or A and D to move the water can.">
+            <div class="sky-glow"></div>
+            <div class="sun" aria-hidden="true"></div>
+            <div class="cloud cloud-one" aria-hidden="true"></div>
+            <div class="cloud cloud-two" aria-hidden="true"></div>
+            <div class="hill hill-back" aria-hidden="true"></div>
+            <div class="hill hill-front" aria-hidden="true"></div>
+            <div class="water" aria-hidden="true"><span class="water-line line-one"></span><span class="water-line line-two"></span><span class="water-line line-three"></span></div>
+            <div class="water-shimmer" aria-hidden="true"></div>
+            <div class="game-items" id="game-items" aria-hidden="true"></div>
+            <div class="player" id="player" style="left:50%" aria-label="Your water can">
+              <div class="player-spark" aria-hidden="true">✦</div>
+              <svg class="watering-can" viewBox="0 0 100 82" role="img" aria-label="Watering can">
+                <path d="M20 32h52a7 7 0 0 1 7 7v27a8 8 0 0 1-8 8H27a8 8 0 0 1-8-8V32Z" fill="#ffc907" stroke="#143c5a" stroke-width="4" stroke-linejoin="round"/>
+                <path d="M72 42h10c7 0 11 4 11 10s-4 10-11 10h-4" fill="none" stroke="#143c5a" stroke-width="4" stroke-linecap="round"/>
+                <path d="M32 32v-9c0-9 6-15 15-15s15 6 15 15v9" fill="none" stroke="#143c5a" stroke-width="4" stroke-linecap="round"/>
+                <path d="m82 39 8-8 5 5-9 9" fill="#8bd1cb" stroke="#143c5a" stroke-width="3" stroke-linejoin="round"/>
+                <circle cx="39" cy="47" r="3" fill="#143c5a"/><circle cx="54" cy="47" r="3" fill="#143c5a"/>
+                <path d="M41 57q6 6 12 0" fill="none" stroke="#143c5a" stroke-width="3" stroke-linecap="round"/>
+              </svg>
+              <span class="player-label">YOU</span>
+            </div>
+
+            <div class="start-screen" id="start-screen">
+              <div class="start-panel">
+                <span class="start-badge"><span class="badge-drop"></span> READY TO PLAY?</span>
+                <h3>Let’s make waves.</h3>
+                <p>Catch <strong>12 clean drops</strong> before time runs out. Watch out for muddy drops!</p>
+                <button class="primary-button" id="start-button" type="button">Start playing <span aria-hidden="true">→</span></button>
+                <span class="start-hint">Takes about a minute · No downloads</span>
+              </div>
+            </div>
+
+            <div class="end-screen" id="end-screen" hidden>
+              <div class="end-panel">
+                <span class="end-illustration" id="end-illustration" aria-hidden="true">✦</span>
+                <p class="eyebrow" id="end-eyebrow">ROUND COMPLETE</p>
+                <h3 id="end-title">Beautiful work.</h3>
+                <p id="end-message">You brought clean water home.</p>
+                <button class="primary-button" id="again-button" type="button">Play again <span aria-hidden="true">↻</span></button>
+              </div>
+            </div>
+            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+          </div>
+
+          <div class="controls-row">
+            <div class="controls-help"><span class="control-key">←</span><span class="control-key">→</span><span>Move your can</span></div>
+            <div class="touch-controls" aria-label="Movement controls">
+              <button class="move-button" type="button" data-move="-1" aria-label="Move left">←</button>
+              <button class="move-button" type="button" data-move="1" aria-label="Move right">→</button>
+            </div>
+            <div class="game-actions"><span id="timer-label">01:00</span><button class="text-button" id="pause-button" type="button" disabled>Pause</button></div>
+          </div>
+        </div>
+
+        <aside class="score-card" aria-label="Game stats">
+          <div class="score-top">
+            <div class="score-label"><span class="score-symbol blue-symbol" aria-hidden="true"><span></span></span><span>Clean drops</span></div>
+            <div class="score-value" id="score-value">0<span class="score-goal"> / 12</span></div>
+            <div class="score-meter" aria-label="Clean drops collected"><span id="score-meter-fill"></span></div>
+            <p class="score-caption">Catch the blue ones!</p>
+          </div>
+          <div class="score-divider"></div>
+          <div class="lives-block">
+            <div class="score-label"><span class="score-symbol mud-symbol" aria-hidden="true"></span><span>Lives left</span></div>
+            <div class="lives" id="lives" aria-label="3 lives remaining"><span>♥</span><span>♥</span><span>♥</span></div>
+            <p class="score-caption">Avoid the muddy drops.</p>
+          </div>
+          <div class="quote-card">
+            <span class="quote-spark" aria-hidden="true">✳</span>
+            <p>“A world where everyone has clean water.”</p>
+            <span class="quote-credit">THE CHARITY: WATER VISION</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="bottom-note">
+        <span class="bottom-drop" aria-hidden="true"></span>
+        <p>Clean water changes everything.</p>
+        <a href="https://www.charitywater.org/" target="_blank" rel="noreferrer">Learn about the mission <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+    <footer><span>Made to bring clean water closer.</span><span class="footer-brand">charity: water <span>·</span> game concept</span></footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
