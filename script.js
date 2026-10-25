@@ -4,9 +4,12 @@
   const titleScreen = document.getElementById("title-screen");
   const gameScreen = document.getElementById("game-screen");
   const endScreen = document.getElementById("end-screen");
+  const loseScreen = document.getElementById("lose-screen");
+  const loadingScreen = document.getElementById("loading-screen");
   const playButton = document.getElementById("play-button");
   const resetButton = document.getElementById("reset-button");
   const replayButton = document.getElementById("replay-button");
+  const loseReplayButton = document.getElementById("lose-replay-button");
   const arena = document.getElementById("arena");
   const jug = document.getElementById("player-jug");
   const actors = document.getElementById("actors");
@@ -16,13 +19,23 @@
   const progressFill = document.getElementById("progress-fill");
   const progressBar = document.querySelector(".progress-track");
   const chargeCount = document.getElementById("charge-count");
+  const healthLabel = document.getElementById("health-label");
+  const healthHearts = document.getElementById("health-hearts");
   const arenaMessage = document.getElementById("arena-message");
   const fireButton = document.getElementById("fire-button");
   const goal = 12;
+  const facts = [
+    { text: "Private donors cover charity: water's operating costs, so 100% of public donations can fund clean water projects.", url: "https://www.charitywater.org/" },
+    { text: "At a handpump, $1 provides an average of 1,100 liters of clean water—enough for one family for about 12.5 days.", url: "https://www.charitywater.org/stories/micro-price-points" },
+    { text: "charity: water combines community evaluations with remote sensors on select handpumps to track water flow.", url: "https://www.charitywater.org/stories/micro-price-points" }
+  ];
 
   let player = { x: 50, y: 79 };
   let cleaned = 0;
   let charges = 3;
+  let health = 3;
+  let damageCooldown = 0;
+  let lastFactIndex = -1;
   let things = [];
   let bullets = [];
   let keys = new Set();
@@ -44,6 +57,9 @@
   function updateHud() {
     cleanedCount.textContent = String(cleaned);
     chargeCount.textContent = String(charges);
+    healthLabel.textContent = health === 1 ? "1 hit left" : health + " hits left";
+    healthHearts.setAttribute("aria-label", health + (health === 1 ? " hit remaining" : " hits remaining"));
+    Array.from(healthHearts.children).forEach((heart, index) => heart.classList.toggle("is-lost", index >= health));
     progressFill.style.width = Math.min(100, cleaned / goal * 100) + "%";
     progressBar.setAttribute("aria-valuenow", String(cleaned));
   }
@@ -70,16 +86,39 @@
     } catch (_) { /* Audio can be unavailable; visual play still works. */ }
   }
 
+  function showFact(textId, linkId) {
+    let index = Math.floor(Math.random() * facts.length);
+    if (facts.length > 1 && index === lastFactIndex) index = (index + 1) % facts.length;
+    lastFactIndex = index;
+    const fact = facts[index];
+    document.getElementById(textId).textContent = fact.text;
+    document.getElementById(linkId).href = fact.url;
+  }
+
   function startGame() {
     try {
       audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
       if (audioContext.state === "suspended") audioContext.resume();
     } catch (_) { /* The game remains playable if audio is unavailable. */ }
+    running = false;
+    keys.clear();
+    shootHeld = false;
     titleScreen.hidden = true;
+    gameScreen.hidden = true;
     endScreen.hidden = true;
+    loseScreen.hidden = true;
+    loadingScreen.hidden = false;
+    showFact("loading-fact", "loading-source");
+    window.setTimeout(beginRound, 1650);
+  }
+
+  function beginRound() {
+    loadingScreen.hidden = true;
     gameScreen.hidden = false;
     cleaned = 0;
     charges = 3;
+    health = 3;
+    damageCooldown = 0;
     player = { x: 50, y: 79 };
     things.forEach(item => item.node.remove());
     bullets.forEach(item => item.node.remove());
@@ -99,7 +138,7 @@
     requestAnimationFrame(frame);
   }
 
-  function endGame() {
+  function finishWin() {
     if (!running) return;
     running = false;
     keys.clear();
@@ -109,6 +148,18 @@
     endScreen.hidden = false;
     makeConfetti();
     replayButton.focus({ preventScroll: true });
+  }
+
+  function finishLose() {
+    if (!running) return;
+    running = false;
+    keys.clear();
+    shootHeld = false;
+    document.getElementById("lose-score").textContent = String(cleaned);
+    showFact("lose-fact", "lose-source");
+    gameScreen.hidden = true;
+    loseScreen.hidden = false;
+    loseReplayButton.focus({ preventScroll: true });
   }
 
   function moveJug() {
@@ -194,7 +245,7 @@
     charges = Math.min(9, charges + 1);
     updateHud();
     say(cleaned >= goal ? "The water is clean. A well is on its way!" : "Cleaned! " + (goal - cleaned) + " more to go.");
-    if (cleaned >= goal) endGame();
+    if (cleaned >= goal) finishWin();
   }
 
   function collect(thing) {
@@ -216,6 +267,26 @@
     sound(180, .2, "triangle");
   }
 
+  function hitByDirtyDrop(thing) {
+    thing.node.remove();
+    if (damageCooldown > 0) return;
+    health = Math.max(0, health - 1);
+    damageCooldown = 1.05;
+    jug.classList.remove("is-hit");
+    void jug.offsetWidth;
+    jug.classList.add("is-hit");
+    window.setTimeout(() => jug.classList.remove("is-hit"), 620);
+    burst(thing.x, thing.y, "#b87345", 12);
+    updateHud();
+    sound(135, .28, "triangle");
+    if (health === 0) {
+      say("Jerry took too many dirty water drops.");
+      finishLose();
+    } else {
+      say("Dirty splash! " + health + (health === 1 ? " hit left." : " hits left."));
+    }
+  }
+
   function overlaps(a, b, radiusX, radiusY) {
     return Math.abs(a.x - b.x) < radiusX && Math.abs(a.y - b.y) < radiusY;
   }
@@ -230,6 +301,7 @@
     if (keys.has("down")) move("down", 4.5 * dt * 60);
     if (shootHeld) shoot();
     shotClock = Math.max(0, shotClock - dt);
+    damageCooldown = Math.max(0, damageCooldown - dt);
     spawnClock -= dt;
     messageClock -= dt;
     if (messageClock <= 0) arenaMessage.classList.add("is-hidden");
@@ -271,6 +343,10 @@
         collect(thing);
         return false;
       }
+      if (thing.kind === "dirty" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 34, 34)) {
+        hitByDirtyDrop(thing);
+        return false;
+      }
       if (thing.kind === "obstacle" && overlaps({ x: px, y: py }, { x: thingPx, y: thingPy }, 38, 35)) {
         hitObstacle(thing);
         return false;
@@ -300,6 +376,7 @@
 
   playButton.addEventListener("click", startGame);
   replayButton.addEventListener("click", startGame);
+  loseReplayButton.addEventListener("click", startGame);
   resetButton.addEventListener("click", startGame);
 
   document.addEventListener("keydown", (event) => {
